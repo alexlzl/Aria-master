@@ -1,0 +1,3 @@
+include ':shareDownload'
+include ':app', ':Aria', ':AriaAnnotations', ':AriaCompiler', ':AppFrame', ':HttpComponent', ':M3U8Component', ':SFtpComponent',
+    ':FtpComponent', ':PublicComponent'
