@@ -753,9 +753,15 @@ public class DownloadDialog extends DialogFragment implements View.OnClickListen
             //取消资源下载事件
             if (getDialog() != null) {
                 getDialog().dismiss();
-                Aria.download(this)
-                        .load(mPicTaskId)
-                        .cancel();
+                if(mMaterialPicTaskId!=null&&mMaterialPicTaskId.size()>0){
+                    for(int i=0;i<mMaterialPicTaskId.size();i++){
+                        Aria.download(this)
+                                .load(mMaterialPicTaskId.get(i))
+                                .cancel();
+
+                    }
+                }
+
                 Aria.download(this)
                         .load(mVideoTaskId)
                         .cancel();
