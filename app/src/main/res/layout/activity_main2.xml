@@ -11,43 +11,19 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <Button
-            android:onClick="singleDownload"
-            android:text="单任务程下载APK"
+            android:onClick="multiDownloadStart"
+            android:text="多务程下载APK"
             android:layout_width="200dp"
             android:layout_height="100dp"/>
         <Button
-            android:id="@+id/stopSingleDownloadBtn"
+            android:id="@+id/stopMultiDownloadBtn"
             android:onClick="stopSingleDownload"
-            android:text="停止单任务程下载APK"
-            android:layout_width="200dp"
-            android:layout_height="100dp"/>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:orientation="horizontal">
-        <Button
-            android:onClick="singleDownloadVideo"
-            android:text="单任务程下载视频"
-            android:layout_width="200dp"
-            android:layout_height="100dp"/>
-        <Button
-            android:onClick="saveByte"
-            android:text="保存字节"
+            android:text="多任务停止下载APK"
             android:layout_width="200dp"
             android:layout_height="100dp"/>
     </LinearLayout>
 
 
-    <Button
-        android:onClick="singleDownloadPic"
-        android:text="单任务程下载图片"
-        android:layout_width="200dp"
-        android:layout_height="100dp"/>
-    <Button
-        android:onClick="multiDownload"
-        android:text="多任务程下载"
-        android:layout_width="200dp"
-        android:layout_height="100dp"/>
     <TextView
         android:id="@+id/task1"
         android:textSize="20sp"

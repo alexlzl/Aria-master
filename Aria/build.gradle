@@ -22,7 +22,8 @@ android {
 }
 dependencies {
   implementation fileTree(include: ['*.jar'], dir: 'libs')
-  testImplementation 'junit:junit:4.12'
+
+    testImplementation 'junit:junit:4.12'
 //  implementation "androidx.appcompat:appcompat:${rootProject.ext.XAppcompatVersion}"
   api project(':AriaAnnotations')
   api project(path: ':PublicComponent')

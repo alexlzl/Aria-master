@@ -1,6 +1,5 @@
 package com.gome.download;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -8,6 +7,9 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -16,7 +18,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.arialyy.annotations.Download;
 import com.arialyy.annotations.DownloadGroup;
@@ -24,15 +25,12 @@ import com.arialyy.aria.core.Aria;
 import com.arialyy.aria.core.download.DownloadEntity;
 import com.arialyy.aria.core.task.DownloadGroupTask;
 import com.arialyy.aria.core.task.DownloadTask;
+import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
-import pl.droidsonroids.gif.GifImageView;
 
 /**
  * @author lzl
@@ -40,7 +38,7 @@ import pl.droidsonroids.gif.GifImageView;
  * @ time 2020/11/11 16:03
  */
 public class DownloadDialog extends DialogFragment implements View.OnClickListener {
-    private GifImageView mCopyProcessIv, mVideoLoadProcessIv, mMiniProgramLoadProcessIv, mMaterialPicLoadProcessIv;
+    private SimpleDraweeView mCopyProcessIv, mVideoLoadProcessIv, mMiniProgramLoadProcessIv, mMaterialPicLoadProcessIv;
     private static final String TAG = "TAG";
     private Activity mActivity;
     private Button mCancelDownloadBtn, mShareBtn;
@@ -90,7 +88,14 @@ public class DownloadDialog extends DialogFragment implements View.OnClickListen
         mShareBtn = view.findViewById(R.id.download_share_button);
         mCancelShareTv = view.findViewById(R.id.download_share_cancel_tv);
         setViewListener();
+        setSupportGif();
+    }
 
+    private void setSupportGif() {
+        GifDrawable.setSupportGif(mCopyProcessIv);
+        GifDrawable.setSupportGif(mVideoLoadProcessIv);
+        GifDrawable.setSupportGif(mMiniProgramLoadProcessIv);
+        GifDrawable.setSupportGif(mMaterialPicLoadProcessIv);
     }
 
     private void setViewListener() {
@@ -131,32 +136,32 @@ public class DownloadDialog extends DialogFragment implements View.OnClickListen
      * @ param
      * @ return
      */
-    public void getPermission(Activity activity) {
-
-        PermissionsManagerUtils.getInstance().checkPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, new PermissionsManagerUtils.IPermissionsResult() {
-            @Override
-            public void passPermissions() {
-                mIPermissionCallBack.success();
-            }
-
-            @Override
-            public void forbidPermissions() {
-                mIPermissionCallBack.fail();
-            }
-        });
-    }
-
-    private IPermissionCallBack mIPermissionCallBack;
-
-    protected void setPermissionCallBack(IPermissionCallBack iPermissionCallBack) {
-        mIPermissionCallBack = iPermissionCallBack;
-    }
-
-    protected interface IPermissionCallBack {
-        void success();
-
-        void fail();
-    }
+//    public void getPermission(Activity activity) {
+//
+//        PermissionsManagerUtils.getInstance().checkPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, new PermissionsManagerUtils.IPermissionsResult() {
+//            @Override
+//            public void passPermissions() {
+//                mIPermissionCallBack.success();
+//            }
+//
+//            @Override
+//            public void forbidPermissions() {
+//                mIPermissionCallBack.fail();
+//            }
+//        });
+//    }
+//
+//    private IPermissionCallBack mIPermissionCallBack;
+//
+//    protected void setPermissionCallBack(IPermissionCallBack iPermissionCallBack) {
+//        mIPermissionCallBack = iPermissionCallBack;
+//    }
+//
+//    protected interface IPermissionCallBack {
+//        void success();
+//
+//        void fail();
+//    }
 
     private long mVideoTaskId;
     private ShareResponseBean.VideoDownLoadBean mVideoDownLoadBean;
@@ -171,7 +176,7 @@ public class DownloadDialog extends DialogFragment implements View.OnClickListen
      * @ return
      */
     public void loadVideo(final ShareResponseBean.VideoDownLoadBean videoDownLoadBean, final Activity activity) {
-        if(videoDownLoadBean!=null&&!TextUtils.isEmpty(videoDownLoadBean.getVideoUrl())){
+        if (videoDownLoadBean != null && !TextUtils.isEmpty(videoDownLoadBean.getVideoUrl())) {
             mVideoDownLoadBean = videoDownLoadBean;
             mVideoLoadTv.setText(String.format("%s正在下载", videoDownLoadBean.getDisplayeStr()));
             mVideoLoadUrl = videoDownLoadBean.getVideoUrl();
@@ -189,7 +194,7 @@ public class DownloadDialog extends DialogFragment implements View.OnClickListen
                     .load(videoDownLoadBean.getVideoUrl())     //读取下载地址
                     .setFilePath(videoPath + "/" + mVideoFileName) //设置文件保存的完整路径
                     .create();   //创建并启动下载
-        }else{
+        } else {
             setVideoLoadFail();
         }
 
@@ -204,6 +209,7 @@ public class DownloadDialog extends DialogFragment implements View.OnClickListen
     //图片素材对应文件
     private List<File> mMaterialPicFile;
     private List<Long> mMaterialPicTaskId = new ArrayList<>();
+    private List<String> mFileName=new ArrayList<>();
 
     /**
      * @ describe 图片素材下载
@@ -213,7 +219,7 @@ public class DownloadDialog extends DialogFragment implements View.OnClickListen
      * @ return
      */
     public void loadMaterialPic(final ShareResponseBean.ImageDownloadBean imageDownloadBean, final Activity activity) {
-        if(imageDownloadBean!=null&&imageDownloadBean.getImageList()!=null&&imageDownloadBean.getImageList().size()>0){
+        if (imageDownloadBean != null && imageDownloadBean.getImageList() != null && imageDownloadBean.getImageList().size() > 0) {
             mMaterialPicTv.setText(String.format("%s正在下载", imageDownloadBean.getDisplayeStr()));
             mImageDownloadBean = imageDownloadBean;
             mMaterialPicUrlList = new ArrayList<>(); // 创建一个http url集合
@@ -225,21 +231,26 @@ public class DownloadDialog extends DialogFragment implements View.OnClickListen
             for (int i = 0; i < imageDownloadBean.getImageList().size(); i++) {
 
                 mMaterialPicUrlList.add(imageDownloadBean.getImageList().get(i).getImageUrl());  // 添加一个视频地址
-                String fileName = DateUtil.getFileName(activity) + imageDownloadBean.getImageList().get(i).getImageSuffix();
+                String dateName=DateUtil.getFileName(activity);
+                String fileName =dateName + imageDownloadBean.getImageList().get(i).getImageSuffix();
+                mFileName.add(fileName);
                 mMaterialPicFileName.add(fileName);
                 File file = new File(SDCardManagerUtils.getSDCardCacheDir(activity) + MATERIAL_PIC_PATH + fileName);
                 mMaterialPicFile.add(file);
+              Log.e(TAG,"存储图片file"+file.getPath()+"存储图片名称"+fileName);
+            }
 
+
+            for (int i = 0; i < imageDownloadBean.getImageList().size(); i++){
                 long videoTaskId = Aria.download(activity)
-                        .load(mMaterialPicUrlList.get(i))     //读取下载地址
-                        .setFilePath(SDCardManagerUtils.getSDCardCacheDir(activity) + MATERIAL_PIC_PATH + "/" + fileName) //设置文件保存的完整路径
+                        .load(imageDownloadBean.getImageList().get(i).getImageUrl())     //读取下载地址
+                        .setFilePath(SDCardManagerUtils.getSDCardCacheDir(activity) + MATERIAL_PIC_PATH  + mFileName.get(i)) //设置文件保存的完整路径
                         .create();   //创建并启动下载
                 mMaterialPicTaskId.add(videoTaskId);
             }
-        }else{
+        } else {
             setMaterialPicLoadFail();
         }
-
 
 
     }
@@ -252,7 +263,7 @@ public class DownloadDialog extends DialogFragment implements View.OnClickListen
      * @ return
      */
     public void saveMiniProgramPic(Bitmap bitmap, ShareResponseBean.MiniProgramDownLaodBean miniProgramDownLaodBean, Activity activity) {
-        if(bitmap!=null){
+        if (bitmap != null) {
             String folderName = SDCardManagerUtils.getSDCardCacheDir(activity) + MINI_PROGRAM_PIC_PATH;
             FileManagerUtils.createDir(folderName);
             String picName = DateUtil.getFileName(activity) + ".jpg";
@@ -260,7 +271,7 @@ public class DownloadDialog extends DialogFragment implements View.OnClickListen
             FileByteManagerUtils.writeBytesToFile(file, BitmapUtil.bitmapToByte(bitmap), true);
             setMiniProgramLoadSuccess(miniProgramDownLaodBean);
             BitmapUtil.saveImageToSystemGallery(activity, file, picName);
-        }else{
+        } else {
             setMiniProgramLoadFail(miniProgramDownLaodBean);
         }
 
@@ -275,10 +286,10 @@ public class DownloadDialog extends DialogFragment implements View.OnClickListen
      */
     public void setCopyTextSuccess(String content) {
         mCopyProcessIv.setImageResource(R.drawable.download_success);
-        if(!TextUtils.isEmpty(content)){
-            mCopyTextTv.setText(String.format("%s已复制成功",content));
-        }else{
-            mCopyTextTv.setText(String.format("%s已复制成功","文案"));
+        if (!TextUtils.isEmpty(content)) {
+            mCopyTextTv.setText(String.format("%s已复制成功", content));
+        } else {
+            mCopyTextTv.setText(String.format("%s已复制成功", "文案"));
         }
 
         isCopyTextOver = true;
@@ -294,13 +305,13 @@ public class DownloadDialog extends DialogFragment implements View.OnClickListen
      */
     public void setCopyTextFail(ShareResponseBean.CopyStringBean copyStringBean) {
         mCopyProcessIv.setImageResource(R.drawable.download_error);
-        if(copyStringBean==null){
-            mCopyTextTv.setText(String.format("%s已复制失败","文案"));
-        }else{
-            if(!TextUtils.isEmpty(copyStringBean.getDisplayeStr())){
-                mCopyTextTv.setText(String.format("%s已复制失败",copyStringBean.getDisplayeStr()));
-            }else{
-                mCopyTextTv.setText(String.format("%s已复制失败","文案"));
+        if (copyStringBean == null) {
+            mCopyTextTv.setText(String.format("%s已复制失败", "文案"));
+        } else {
+            if (!TextUtils.isEmpty(copyStringBean.getDisplayeStr())) {
+                mCopyTextTv.setText(String.format("%s已复制失败", copyStringBean.getDisplayeStr()));
+            } else {
+                mCopyTextTv.setText(String.format("%s已复制失败", "文案"));
             }
         }
 
@@ -331,10 +342,10 @@ public class DownloadDialog extends DialogFragment implements View.OnClickListen
      */
     public void setVideoLoadFail() {
         mVideoLoadProcessIv.setImageResource(R.drawable.download_error);
-        if(mVideoDownLoadBean!=null&&! TextUtils.isEmpty(mVideoDownLoadBean.getDisplayeStr())){
+        if (mVideoDownLoadBean != null && !TextUtils.isEmpty(mVideoDownLoadBean.getDisplayeStr())) {
             mVideoLoadTv.setText(String.format("%s已下载失败", mVideoDownLoadBean.getDisplayeStr()));
-        }else{
-            mVideoLoadTv.setText(String.format("%s已下载失败","视频"));
+        } else {
+            mVideoLoadTv.setText(String.format("%s已下载失败", "视频"));
         }
 
         isLoadVideoOver = true;
@@ -391,20 +402,20 @@ public class DownloadDialog extends DialogFragment implements View.OnClickListen
      */
     public void setMaterialPicLoadFail() {
         mMaterialPicLoadProcessIv.setImageResource(R.drawable.download_error);
-        if(mImageDownloadBean!=null&&!TextUtils.isEmpty( mImageDownloadBean.getDisplayeStr())){
+        if (mImageDownloadBean != null && !TextUtils.isEmpty(mImageDownloadBean.getDisplayeStr())) {
             mMaterialPicTv.setText(String.format("%s下载失败(%d/%d)", mImageDownloadBean.getDisplayeStr(), mMaterialPicLoadSuccessNum, mMaterialPicUrlList.size()));
-        }else{
+        } else {
             mMaterialPicTv.setText("素材图片下载失败");
         }
 
         checkIsAllTaskOver();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        PermissionsManagerUtils.getInstance().onRequestPermissionsResult(getActivity(), requestCode, permissions, grantResults);
-    }
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        PermissionsManagerUtils.getInstance().onRequestPermissionsResult(getActivity(), requestCode, permissions, grantResults);
+//    }
 
     /**
      * @ describe 预处理的注解，在任务为开始前回调（一般在此处预处理UI界面）
@@ -497,7 +508,7 @@ public class DownloadDialog extends DialogFragment implements View.OnClickListen
      */
     @Download.onTaskFail
     protected void downloadTaskFail(DownloadTask task) {
-        if(task!=null){
+        if (task != null) {
             Log.e(TAG, "Fail===========" + task.getKey());
         }
         if (mVideoLoadUrl != null && mVideoLoadUrl.equals(task.getKey())) {
@@ -515,9 +526,9 @@ public class DownloadDialog extends DialogFragment implements View.OnClickListen
                 //所有图片任务执行失败表示任务失败
                 isMaterialPicLoadOver = true;
                 setMaterialPicLoadFail();
-                Log.e(TAG, "所有素材图片任务执行失败==========="+mMaterialPicLoadFailNum);
-            }else if(mLoadOverPicNum == mMaterialPicUrlList.size()){
-                Log.e(TAG, "所有素材图片任务执行完成=====失败次数"+mMaterialPicLoadFailNum+"执行完总任务次数=="+mLoadOverPicNum);
+                Log.e(TAG, "所有素材图片任务执行失败===========" + mMaterialPicLoadFailNum);
+            } else if (mLoadOverPicNum == mMaterialPicUrlList.size()) {
+                Log.e(TAG, "所有素材图片任务执行完成=====失败次数" + mMaterialPicLoadFailNum + "执行完总任务次数==" + mLoadOverPicNum);
                 isMaterialPicLoadOver = true;
                 setMaterialPicLoadSuccess();
                 //进行系统相册同步
@@ -562,10 +573,11 @@ public class DownloadDialog extends DialogFragment implements View.OnClickListen
             if (mLoadOverPicNum == mMaterialPicUrlList.size() && mMaterialPicLoadFailNum != mMaterialPicUrlList.size()) {
                 //所有图片任务执行完成
                 isMaterialPicLoadOver = true;
-                Log.e(TAG, "所有素材图片任务执行完成=====失败次数"+mMaterialPicLoadFailNum+"执行完总任务次数=="+mLoadOverPicNum);
+                Log.e(TAG, "所有素材图片任务执行完成=====失败次数" + mMaterialPicLoadFailNum + "执行完总任务次数==" + mLoadOverPicNum);
                 setMaterialPicLoadSuccess();
                 //进行系统相册同步
                 for (int i = 0; i < mMaterialPicFile.size(); i++) {
+                    Log.e(TAG,"获取 图片file"+mMaterialPicFile.get(i).getPath()+"图片名称"+mMaterialPicFileName.get(i));
                     BitmapUtil.saveImageToSystemGallery(mActivity, mMaterialPicFile.get(i), mMaterialPicFileName.get(i));
                 }
                 mLoadOverPicNum = 0;
@@ -721,10 +733,10 @@ public class DownloadDialog extends DialogFragment implements View.OnClickListen
         Log.e(TAG, "检测是否所有任务完成" + "isLoadVideoOver==" + isLoadVideoOver + "==isMiniProgramLoadOver==" + isMiniProgramLoadOver + "==isMaterialPicLoadOver==" + isMaterialPicLoadOver + "==isCopyTextOver==" + isCopyTextOver);
         if (isLoadVideoOver && isMiniProgramLoadOver && isMaterialPicLoadOver && isCopyTextOver) {
             showShareView();
-            isLoadVideoOver=false;
-            isMiniProgramLoadOver=false;
-            isMaterialPicLoadOver=false;
-            isCopyTextOver=false;
+            isLoadVideoOver = false;
+            isMiniProgramLoadOver = false;
+            isMaterialPicLoadOver = false;
+            isCopyTextOver = false;
         }
     }
 
@@ -746,22 +758,22 @@ public class DownloadDialog extends DialogFragment implements View.OnClickListen
         super.onDismiss(dialog);
         Aria.download(this).unRegister();
     }
-
+    public static final String WECHAT_PACKAGE_NAME = "com.tencent.mm";
     @Override
     public void onClick(View v) {
         if (R.id.download_cancel_bt == v.getId()) {
             //取消资源下载事件
             if (getDialog() != null) {
                 getDialog().dismiss();
-                if(mMaterialPicTaskId!=null&&mMaterialPicTaskId.size()>0){
-                    for(int i=0;i<mMaterialPicTaskId.size();i++){
-                        Aria.download(this)
-                                .load(mMaterialPicTaskId.get(i))
-                                .cancel();
-
-                    }
+                Aria.download(this)
+                        .load(mPicTaskId)
+                        .cancel();
+                if(mMaterialPicFile!=null){
+                    mMaterialPicFile.clear();
                 }
-
+                if(mMaterialPicFileName!=null){
+                    mMaterialPicFileName.clear();
+                }
                 Aria.download(this)
                         .load(mVideoTaskId)
                         .cancel();
@@ -770,10 +782,11 @@ public class DownloadDialog extends DialogFragment implements View.OnClickListen
         }
         if (R.id.download_share_button == v.getId()) {
             //进行分享事件
-            Toast.makeText(mActivity, "cancel", Toast.LENGTH_LONG).show();
             /**
              * TODO 分享方法调用
              */
+
+//            com.gome.mcp.share.utils.Utils.openApp(getContext(), WECHAT_PACKAGE_NAME);
         }
         if (R.id.download_share_cancel_tv == v.getId()) {
             //取消分享事件

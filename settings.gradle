@@ -1,3 +1,2 @@
-include ':shareDownload'
 include ':Aria', ':AriaAnnotations', ':AriaCompiler', ':HttpComponent',
-    ':PublicComponent'
+    ':PublicComponent','app','shareDownload'

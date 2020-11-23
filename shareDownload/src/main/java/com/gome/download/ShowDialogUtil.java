@@ -1,11 +1,18 @@
 package com.gome.download;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentManager;
 import android.text.TextUtils;
 import android.widget.Toast;
 
-import androidx.fragment.app.FragmentManager;
+import com.gome.ecmall.gpermission.GomePermissionListener;
+import com.gome.ecmall.gpermission.GomePermissionManager;
+import com.gome.ecmall.gpermission.PermissionItem;
+
 
 /**
  * @author lzl
@@ -43,19 +50,33 @@ public class ShowDialogUtil {
      */
     private void startLoadResource(final ShareResponseBean shareResponseBean) {
         loadCopyText(shareResponseBean.getCopyString());
-        mDownloadDialog.setPermissionCallBack(new DownloadDialog.IPermissionCallBack() {
+//        mDownloadDialog.setPermissionCallBack(new DownloadDialog.IPermissionCallBack() {
+//            @Override
+//            public void success() {
+//                loadVideo(shareResponseBean.getVideoDownLoad());
+//                loadMaterialPic(shareResponseBean.getImageDownload());
+//            }
+//
+//            @Override
+//            public void fail() {
+//                Toast.makeText(mActivity, "获取权限失败", Toast.LENGTH_LONG).show();
+//            }
+//        });
+//        mDownloadDialog.getPermission(mActivity);
+        PermissionItem[] permissionItems={new PermissionItem(Manifest.permission.WRITE_EXTERNAL_STORAGE)};
+        GomePermissionManager gomePermissionManager= new  GomePermissionManager.Builder(permissionItems).setGomePermissionListener(new GomePermissionListener() {
             @Override
-            public void success() {
-                loadVideo(shareResponseBean.getVideoDownLoad());
-                loadMaterialPic(shareResponseBean.getImageDownload());
+            public void onGomePermission(@NonNull String[] strings, @NonNull int[] ints) {
+                    if(ints[0]==PackageManager.PERMISSION_GRANTED){
+                        //获取了权限
+                        loadVideo(shareResponseBean.getVideoDownLoad());
+                        loadMaterialPic(shareResponseBean.getImageDownload());
+                    }else{
+                        Toast.makeText(mActivity, "获取权限失败", Toast.LENGTH_LONG).show();
+                    }
             }
-
-            @Override
-            public void fail() {
-                Toast.makeText(mActivity, "获取权限失败", Toast.LENGTH_LONG).show();
-            }
-        });
-        mDownloadDialog.getPermission(mActivity);
+        }).setDialogisShow(true).setDialogisShowRationale(true).builder();
+        gomePermissionManager.applyPermission(mActivity);
 
     }
 
